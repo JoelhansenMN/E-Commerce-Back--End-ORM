@@ -11,6 +11,7 @@ router.get('/', async (req, res) => {
     res.json({ status: "success", payload: result })
   } catch (err) {
     res.status(400).json({ status: "error" })
+    console.log(err)
   }
   // be sure to include its associated Category and Tag data
 });
@@ -34,18 +35,18 @@ router.get('/:id', async (req, res) => {
 
 // create new product
 router.post('/', async (req, res) => {
-  try {
-    const newProduct = await Product.create(req.body, {
-      include: [{ model: Category }, { model: Tag }]
-    });
-    if (req.body.tagIds.length > 0) {
-      await newProduct.addTags(req.body.tagIds);
-    }
-    res.json({ status: "success", payload: newProduct });
-  } catch (err) {
-    res.status(400).json({ status: "error" });
-  }
-});
+//   try {
+//     const newProduct = await Product.create(req.body, {
+//       include: [{ model: Category }, { model: Tag }]
+//     });
+//     if (req.body.tagIds.length > 0) {
+//       await newProduct.addTags(req.body.tagIds);
+//     }
+//     res.json({ status: "success", payload: newProduct });
+//   } catch (err) {
+//     res.status(400).json({ status: "error" });
+//   }
+// });
   /* req.body should look like this...
     {
       product_name: "Basketball",
@@ -54,8 +55,7 @@ router.post('/', async (req, res) => {
       tagIds: [1, 2, 3, 4]
     }
   */
-  Product.create(req.body)
-    .then((product) => {
+  Product.create(req.body) .then((product) => {
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
       if (req.body.tagIds.length) {
         const productTagIdArr = req.body.tagIds.map((tag_id) => {
@@ -73,7 +73,8 @@ router.post('/', async (req, res) => {
     .catch((err) => {
       console.log(err);
       res.status(400).json(err);
-    });
+    })
+  });
 
 // update product
 router.put('/:id', (req, res) => {
@@ -120,8 +121,15 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
+  try {
+    await Product.destroy({ where: { id: req.params.id } });
+    res.json({ status: "success" });
+  } catch (err) {
+    res.status(400).json({ status: "error" });
+  }
 });
+
 
 module.exports = router;

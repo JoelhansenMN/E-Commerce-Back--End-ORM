@@ -1,3 +1,4 @@
+
 const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
@@ -25,16 +26,34 @@ router.get('/:id', async (req, res) => {
   // be sure to include its associated Product data
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   // create a new tag
+  try {
+    const newTag = await Tag.create(req.body);
+    res.json({ status: "success", payload: newTag });
+  } catch (err) {
+    res.status(400).json({ status: "error" });
+  }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
+  try {
+    await Tag.update(req.body, { where: { id: req.params.id } });
+    res.json({ status: "success" });
+  } catch (err) {
+    res.status(400).json({ status: "error" });
+  }
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete on tag by its `id` value
+  try {
+    await Tag.destroy({ where: { id: req.params.id } });
+    res.json({ status: "success" });
+  } catch (err) {
+    res.status(400).json({ status: "error" });
+  }
 });
 
 module.exports = router;
